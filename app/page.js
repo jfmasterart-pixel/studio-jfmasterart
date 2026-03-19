@@ -1,5 +1,5 @@
-
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import Hls from "hls.js";
 
@@ -17,32 +17,60 @@ export default function App() {
         const hls = new Hls();
         hls.loadSource(LIVE_URL);
         hls.attachMedia(videoRef.current);
-      } else {
+
+        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+          videoRef.current.play();
+        });
+
+      } else if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
         videoRef.current.src = LIVE_URL;
+        videoRef.current.addEventListener("loadedmetadata", function () {
+          videoRef.current.play();
+        });
       }
     }
   }, [liveOpen]);
 
   return (
-    <div style={{background:"#000",color:"#fff",minHeight:"100vh",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"20px"}}>
-      <h1>STUDIO JFMASTERART</h1>
+    <div style={{
+      background: "#000",
+      color: "#fff",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      justifyContent: "center",
+      gap: "20px"
+    }}>
+      
+      <h1 style={{ fontSize: "20px" }}>STUDIO JFMASTERART</h1>
 
-      <button onClick={()=>setRadioPlaying(!radioPlaying)}>
+      {/* RADIO */}
+      <button onClick={() => setRadioPlaying(!radioPlaying)}>
         {radioPlaying ? "Pausar Rádio" : "Ouvir Rádio"}
       </button>
 
-      {radioPlaying && <audio src={RADIO_URL} controls autoPlay />}
+      {radioPlaying && (
+        <audio src={RADIO_URL} controls autoPlay />
+      )}
 
-      <button onClick={()=>setLiveOpen(true)}>
+      {/* LIVE */}
+      <button onClick={() => setLiveOpen(true)}>
         Assistir Live
       </button>
 
       {liveOpen && (
-        <div>
-          <button onClick={()=>setLiveOpen(false)}>Fechar</button>
-          <video ref={videoRef} controls autoPlay style={{width:"100%"}}/>
+        <div style={{ width: "100%" }}>
+          <button onClick={() => setLiveOpen(false)}>Fechar</button>
+          <video
+            ref={videoRef}
+            controls
+            autoPlay
+            style={{ width: "100%", marginTop: "10px" }}
+          />
         </div>
       )}
+
     </div>
   );
 }
